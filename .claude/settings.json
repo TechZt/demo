@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r f; [ -z \"$f\" ] && exit 0; git add \"$f\" && git commit -m \"update: $(basename $f)\" && git push origin master; } 2>/dev/null || true",
+            "statusMessage": "提交到 GitHub..."
+          }
+        ]
+      }
+    ]
+  }
+}
