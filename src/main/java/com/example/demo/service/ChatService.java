@@ -5,10 +5,15 @@ import com.example.demo.dto.ChatResponse;
 import com.example.demo.model.ChatMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -26,11 +31,18 @@ public class ChatService {
     private String deepseekModel;
     @Value("${deepseek.max-tokens}")
     private int deepseekMaxTokens;
-    @Value("${deepseek.system-prompt}")
+    @Value("${deepseek.prompt-template}")
+    private Resource promptTemplateResource;
+
     private String systemPrompt;
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @PostConstruct
+    private void loadPrompt() throws IOException {
+        systemPrompt = StreamUtils.copyToString(promptTemplateResource.getInputStream(), StandardCharsets.UTF_8);
+    }
 
     public ChatResponse chat(ChatRequest request) {
         String sessionId = (request.getSessionId() == null || request.getSessionId().isEmpty())
