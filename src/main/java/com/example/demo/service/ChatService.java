@@ -6,10 +6,8 @@ import com.example.demo.model.ChatMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -23,21 +21,13 @@ public class ChatService {
 
     private final Map<String, List<ChatMessage>> sessions = new ConcurrentHashMap<>();
 
-    @Value("${deepseek.api.key}")
-    private String deepseekApiKey;
-    @Value("${deepseek.api.url}")
-    private String deepseekApiUrl;
-    @Value("${deepseek.model}")
-    private String deepseekModel;
-    @Value("${deepseek.max-tokens}")
-    private int deepseekMaxTokens;
     @Value("${deepseek.prompt-template}")
     private Resource promptTemplateResource;
 
     private String systemPrompt;
 
     @Autowired
-    private RestTemplate restTemplate;
+    private DeepSeekClient deepSeekClient;
 
     @PostConstruct
     private void loadPrompt() throws IOException {
