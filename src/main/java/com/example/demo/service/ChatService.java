@@ -58,8 +58,6 @@ public class ChatService {
         sessions.remove(sessionId);
     }
 
-    // -------- DeepSeek (OpenAI 兼容协议) --------
-    @SuppressWarnings("unchecked")
     private String callDeepSeekApi(List<ChatMessage> messages) {
         List<Map<String, String>> msgs = new ArrayList<>();
         Map<String, String> system = new HashMap<>();
@@ -67,26 +65,7 @@ public class ChatService {
         system.put("content", systemPrompt);
         msgs.add(system);
         msgs.addAll(toMsgList(messages));
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("model", deepseekModel);
-        body.put("max_tokens", deepseekMaxTokens);
-        body.put("messages", msgs);
-        body.put("stream", false);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + deepseekApiKey);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                deepseekApiUrl,
-                new HttpEntity<>(body, headers),
-                Map.class
-        );
-
-        List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
-        Map<String, Object> messageMap = (Map<String, Object>) choices.get(0).get("message");
-        return (String) messageMap.get("content");
+        return deepSeekClient.call(msgs);
     }
 
     private List<Map<String, String>> toMsgList(List<ChatMessage> messages) {
